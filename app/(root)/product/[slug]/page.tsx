@@ -5,7 +5,10 @@ import { getProductBySlug } from "@/lib/actions/product.actions";
 import { notFound } from "next/navigation";
 import ProductImages from "@/components/shared/product/product-images";
 import AddToCart from "@/components/shared/product/add-to-cart";
-
+import { getMyCart } from "@/lib/actions/cart.actions";
+import ReviewList from "./review-list";
+import { auth } from "@/auth";
+import Rating from "@/components/shared/product/rating";
 
 const ProductDetailsPage = async (props: {
   params: Promise<{ slug:string }>
@@ -15,6 +18,12 @@ const ProductDetailsPage = async (props: {
 
   const product = await getProductBySlug(slug);
   if (!product) notFound();
+
+  const session = await auth();
+  const userId = session?.user?.id;
+
+
+  const cart = await getMyCart();
 
   return ( <> 
   
@@ -33,7 +42,8 @@ const ProductDetailsPage = async (props: {
             <h1 className="h3-bold">
               {product.name}
             </h1>
-            <p>{product.rating} of {product.numReviews} Reviwes</p>
+            <Rating value={Number(product.rating)} />
+            <p> { product.numReviews } Reviews </p>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <ProductPrice value={Number(product.price)} className="w-24 rounded-full bg-green-100 text-green-700 px-5 py-2" />
             </div>
@@ -62,7 +72,9 @@ const ProductDetailsPage = async (props: {
               </div>
               { product.stock > 0 && (
                 <div className="flex-center">
-                  <AddToCart item={{
+                  <AddToCart
+                   cart = { cart }
+                   item={{
                     productId: product.id,
                     name: product.name,
                     slug: product.slug,
@@ -79,7 +91,14 @@ const ProductDetailsPage = async (props: {
       </div>
 
     </section>
-  
+  <section className="mt-10">
+    <h2 className="h2-bold">Customer Reviews</h2>
+    <ReviewList
+    userId={userId || ''}
+    productId={product.id}
+    productSlug={product.slug}
+    />          
+  </section>
   
    </> );
 }

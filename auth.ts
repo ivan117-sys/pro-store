@@ -4,8 +4,7 @@ import { prisma } from '@/db/prisma';
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { compareSync } from 'bcrypt-ts-edge';
 import type { NextAuthConfig } from 'next-auth';
-import { cookies } from 'next/headers';
-import { NextResponse } from 'next/server';
+import { cookies } from "next/headers"
 
 export const config = {
   pages: {
@@ -72,6 +71,7 @@ export const config = {
       // Assign user fields to the token
 
       if (user) {
+        token.id = user.id
         token.role = user.role;
 
         // If user has no name then use the email
@@ -84,23 +84,56 @@ export const config = {
             data: { name: token.name }
            })
         }
+        if (trigger === 'signIn' || trigger === 'signUp') {
+          const cookiesObject = await cookies();
+          const sessionCartId = cookiesObject.get('sessionCartId')?.value;
+
+          if (sessionCartId) {
+            // Get the session-based (anonymous) cart
+            const sessionCart = await prisma.cart.findUnique({
+              where: { id: sessionCartId }
+            });
+          
+            // Check if the logged-in user already has a cart
+            const userCart = await prisma.cart.findFirst({
+              where: { userId: user.id }
+            });
+          
+            if (sessionCart) {
+              if (userCart) {
+                // Merge the anonymous cart into the user's existing cart
+                await prisma.cart.update({
+                  where: { id: userCart.id },
+                  data: {
+                    items: {
+                      push: sessionCart.items // Append guest cart items to user's cart
+                    }
+                  }
+                });
+          
+                // Delete the old anonymous cart since items are now merged
+                await prisma.cart.delete({ where: { id: sessionCart.id } });
+              } else {
+                // If user has no cart, just assign the guest cart to the user
+                await prisma.cart.update({
+                  where: { id: sessionCart.id },
+                  data: { userId: user.id }
+                });
+              }
+            }
+          }
+          
+        }
       }
+
+      // Handle session updates
+      if (session?.user.name && trigger === 'update') {
+        token.name = session.user.name
+      }
+
       return token
     },
-    authorized({ request, auth }: any) {
-      // Check for session cart cookie
-      if (!request.cookies.get('sessionCartId')) {
-        // Generate new session cart id cookie
-
-        const sessionCartId = crypto.randomUUID();
-
-        console.log(sessionCartId);
-        return true
-
-      } else {
-        return true
-      }
-    }
+    
   }
 } satisfies NextAuthConfig ;
 
