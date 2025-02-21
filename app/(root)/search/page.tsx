@@ -30,7 +30,7 @@ const sortOrders = ['newest', 'lowest', 'highest', 'rating']
 
 const ratings = [4,3,2,1];
 
-export async function generateMetaData(props: {
+export async function generateMetadata(props: {
   searchParams: Promise<{
     q: string;
     category: string;
