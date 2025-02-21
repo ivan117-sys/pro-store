@@ -4,6 +4,10 @@ import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
 
+  const authCookie =
+  request.cookies.get("__Secure-authjs.session-token") ||
+  request.cookies.get("authjs.session-token");
+
   // Arry of regex patterns of paths we want to protect
   const protectedPaths = [
     /\/shipping-address/,
@@ -18,9 +22,7 @@ export function middleware(request: NextRequest) {
   // Get pathname from the req URL object
    const { pathname } = request.nextUrl;
 
-  //  Check if user is not authenticated and accessing a protected path
-  const isAuthenticated = request.cookies.get("authjs.session-token"); 
-  if (!isAuthenticated && protectedPaths.some((p) => p.test(pathname))) {
+  if (!authCookie && protectedPaths.some((p) => p.test(pathname))) {
     return NextResponse.redirect(new URL("/sign-in", request.url));
   }
   
