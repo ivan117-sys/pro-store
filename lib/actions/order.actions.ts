@@ -191,7 +191,7 @@ export async function approvePayPalOrder(
     } 
 
     // Update order to paid
-    await updateOrderToPaid({
+     await updateOrderToPaid({
       orderId,
       paymentResult: {
         id: captureData.id,
@@ -215,7 +215,7 @@ export async function approvePayPalOrder(
 
   // Update order to paid
 
-  async function updateOrderToPaid({ 
+  export async function updateOrderToPaid({ 
     orderId,
     paymentResult
    }: {
