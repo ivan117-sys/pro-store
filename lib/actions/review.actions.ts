@@ -5,7 +5,6 @@ import { insertReviewSchema } from "../validators";
 import { formatError } from "../utils";
 import { auth } from "@/auth";
 import { prisma } from "@/db/prisma";
-import { TicketX } from "lucide-react";
 import { revalidatePath } from "next/cache";
 
 // Create & Update Reviews
