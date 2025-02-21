@@ -8,7 +8,6 @@ import { shippingAddressSchema } from "@/lib/validators";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ControllerRenderProps, useForm, SubmitHandler } from "react-hook-form";
 import { z } from "zod";
-import { userAgent } from "next/server";
 import { shippingAddressDefaultValues } from "@/lib/constants";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";

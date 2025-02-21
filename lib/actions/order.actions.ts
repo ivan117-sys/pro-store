@@ -286,14 +286,14 @@ export async function approvePayPalOrder(
     if (!session) throw new Error('User is not authorized');
 
     const data = await prisma.order.findMany({
-      where: { userId: session?.user?.id! },
+      where: { userId: session?.user?.id ?? "" },
       orderBy: { createdAt: 'desc' },
       take: limit,
       skip: (page - 1) * limit
     });
 
     const dataCount = await prisma.order.count({
-      where: {userId: session?.user?.id!}
+      where: {userId: session?.user?.id ?? ""}
     });
 
     return {
